@@ -1,3 +1,11 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import styles from './LoginPage.module.css'
+
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -30,12 +38,7 @@ export const metadata: Metadata = {
 
 
 
-'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
-import styles from './LoginPage.module.css'
 
 export default function LoginPage() {
   const router = useRouter()
