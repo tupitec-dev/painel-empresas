@@ -58,12 +58,16 @@ export default function LoginPage() {
     setCarregando(false)
   }
 
+
+
   const handleResetSenha = async () => {
     setErro('')
     setMensagemReset('')
+    setCarregando(true)
 
     if (!email) {
       setErro('Informe o e-mail para redefinir a senha.')
+      setCarregando(false)
       return
     }
 
@@ -72,11 +76,18 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setErro('Erro ao enviar link de redefinição. Verifique o e-mail informado.')
+      if (error.status === 429) {
+        setErro('Muitas tentativas seguidas. Aguarde alguns minutos antes de tentar novamente.')
+      } else {
+        setErro('Erro ao enviar link de redefinição. Verifique o e-mail informado.')
+      }
     } else {
       setMensagemReset('Um link foi enviado para seu e-mail para redefinir a senha.')
     }
+
+    setCarregando(false)
   }
+
 
 
   return (
