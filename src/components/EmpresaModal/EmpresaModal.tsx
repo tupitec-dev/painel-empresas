@@ -78,6 +78,10 @@ export default function EmpresaModal({
           .eq('perfil', 'admin_empresa')
           .single()
 
+        if (_error) {
+          console.error('Erro ao carregar usuário responsável:', _error.message)
+        }
+
         if (data?.email) {
           setEmailResponsavel(data.email)
         }
