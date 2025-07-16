@@ -72,7 +72,7 @@ export default function LoginPage() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://painel.tupitec.dev/nova-senha',
+      redirectTo: 'https://painel-empresas.vercel.app/nova-senha',
     })
 
     if (error) {
