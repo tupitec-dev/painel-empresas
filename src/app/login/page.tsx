@@ -68,7 +68,7 @@ export default function LoginPage() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/nova-senha`,
+      redirectTo: 'https://painel.tupitec.dev/nova-senha',
     })
 
     if (error) {
@@ -77,6 +77,7 @@ export default function LoginPage() {
       setMensagemReset('Um link foi enviado para seu e-mail para redefinir a senha.')
     }
   }
+
 
   return (
     <div className={styles.container}>

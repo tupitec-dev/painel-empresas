@@ -14,13 +14,31 @@ export default function NovaSenhaPage() {
   const router = useRouter()
 
   useEffect(() => {
-    async function verificarSessao() {
+    async function restaurarSessao() {
+      const url = new URL(window.location.href)
+      const type = url.searchParams.get('type')
+      const access_token = url.searchParams.get('access_token')
+      const refresh_token = url.searchParams.get('refresh_token')
+
+      if (type === 'recovery' && access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        })
+
+        if (error) {
+          setErro('Erro ao restaurar sessão. Link pode ter expirado.')
+          return
+        }
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         setErro('Sessão inválida. Por favor, tente o link novamente.')
       }
     }
-    verificarSessao()
+
+    restaurarSessao()
   }, [])
 
   const handleAtualizarSenha = async (e: React.FormEvent) => {
