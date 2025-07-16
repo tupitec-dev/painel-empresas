@@ -1,0 +1,63 @@
+.container {
+  margin-top: 2rem;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.tabela th,
+.tabela td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+  color: #f0f0f0; /* fonte clara para fundo escuro */
+}
+
+.modal {
+  margin-top: 1rem;
+  border: 1px solid #333;
+  background: transparent; /* remove o branco */
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.modal input {
+  display: block;
+  margin-bottom: 0.5rem;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #222;
+  color: #f0f0f0;
+}
+
+.botoes {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.botao {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.botao:hover {
+  background-color: #005fc1;
+}
+
+.botao:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}

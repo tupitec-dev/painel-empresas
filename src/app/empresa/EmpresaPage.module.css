@@ -1,0 +1,67 @@
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 8px;
+  /* Removido o background-color */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.titulo {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.label {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.input {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* 🔒 Campos somente leitura (ex: nome e responsável) */
+.input[readonly] {
+  background-color: #f3f3f3;
+  color: #888;
+  cursor: not-allowed;
+  border: 1px solid #ccc;
+}
+
+.paragrafo {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #444;
+}
+
+.botao {
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.2rem;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.botao:hover {
+  background-color: #005fc1;
+}
+
+.botao:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
