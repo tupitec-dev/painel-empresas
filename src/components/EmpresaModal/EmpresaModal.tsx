@@ -71,7 +71,7 @@ export default function EmpresaModal({
           cnpj: aplicarMascaraCNPJ(cnpj),
         })
 
-        const { data, error } = await supabase
+        const { data, error: _error } = await supabase
           .from('usuarios')
           .select('email')
           .eq('empresa_id', id)
