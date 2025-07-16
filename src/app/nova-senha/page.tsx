@@ -13,12 +13,13 @@ export default function NovaSenhaPage() {
   const [carregando, setCarregando] = useState(false)
   const router = useRouter()
 
+  
   useEffect(() => {
     async function restaurarSessao() {
-      const url = new URL(window.location.href)
-      const type = url.searchParams.get('type')
-      const access_token = url.searchParams.get('access_token')
-      const refresh_token = url.searchParams.get('refresh_token')
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const type = hashParams.get('type')
+      const access_token = hashParams.get('access_token')
+      const refresh_token = hashParams.get('refresh_token')
 
       if (type === 'recovery' && access_token && refresh_token) {
         const { error } = await supabase.auth.setSession({
@@ -40,6 +41,8 @@ export default function NovaSenhaPage() {
 
     restaurarSessao()
   }, [])
+
+
 
   const handleAtualizarSenha = async (e: React.FormEvent) => {
     e.preventDefault()
