@@ -19,7 +19,6 @@ export default function SecaoInformacoes({ empresaId }: Props) {
   const [informacoes, setInformacoes] = useState<InfoEmpresa[]>([])
   const [mostrarModal, setMostrarModal] = useState(false)
   const [novaInfo, setNovaInfo] = useState({ chave: '', valor: '', descricao: '' })
-  // NOVO: Estado de loading para o botão de salvar
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -38,27 +37,30 @@ export default function SecaoInformacoes({ empresaId }: Props) {
     }
   }, [empresaId])
 
-  // ALTERADO: Função de cadastrar agora é um handler de form com validação
+  // ALTERADO: Função de cadastrar agora atualiza a tela sem buscar os dados novamente
   async function handleCadastrar(e: React.FormEvent) {
-    e.preventDefault() // Previne o comportamento padrão de submissão do formulário
+    e.preventDefault()
 
-    // 1. Validação dos campos
     if (
       !novaInfo.chave.trim() ||
       !novaInfo.valor.trim() ||
       !novaInfo.descricao.trim()
     ) {
       alert('Todos os campos são obrigatórios.')
-      return // Interrompe a função se a validação falhar
+      return
     }
     
     setLoading(true)
     
     try {
-        const { error } = await supabase.from('informacoes_empresa').insert({
-            empresa_id: empresaId,
-            ...novaInfo,
-        })
+        const { data: novaInformacao, error } = await supabase
+            .from('informacoes_empresa')
+            .insert({
+                empresa_id: empresaId,
+                ...novaInfo,
+            })
+            .select() // Pede ao Supabase para retornar o item criado
+            .single() // Como criamos só um, pegamos o objeto único
 
         if (error) {
             alert('Ocorreu um erro ao cadastrar a informação. Tente novamente.')
@@ -66,20 +68,34 @@ export default function SecaoInformacoes({ empresaId }: Props) {
         } else {
             setNovaInfo({ chave: '', valor: '', descricao: '' })
             setMostrarModal(false)
-
-            const { data: atualizadas } = await supabase
-                .from('informacoes_empresa')
-                .select('*')
-                .eq('empresa_id', empresaId)
-                .order('criado_em', { ascending: false })
-
-            setInformacoes(atualizadas || [])
+            // Adiciona a nova informação no início da lista, atualizando a tela
+            setInformacoes([novaInformacao, ...informacoes])
         }
     } catch(e) {
         alert('Ocorreu um erro inesperado.')
         console.error(e)
     } finally {
         setLoading(false)
+    }
+  }
+
+  // NOVO: Função para excluir uma informação
+  async function handleExcluir(id: string) {
+    if (!window.confirm('Tem certeza que deseja excluir esta informação?')) {
+      return
+    }
+
+    const { error } = await supabase
+      .from('informacoes_empresa')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      alert('Ocorreu um erro ao excluir a informação.')
+      console.error('Erro Supabase:', error)
+    } else {
+      // Remove a informação da lista na tela, sem precisar recarregar
+      setInformacoes(informacoes.filter(info => info.id !== id))
     }
   }
 
@@ -90,28 +106,8 @@ export default function SecaoInformacoes({ empresaId }: Props) {
         + Cadastrar informação
       </button>
 
-      <table className={styles.tabela}>
-        <thead>
-          <tr>
-            <th>Chave</th>
-            <th>Valor</th>
-            <th>Descrição</th>
-          </tr>
-        </thead>
-        <tbody>
-          {informacoes.map(info => (
-            <tr key={info.id}>
-              <td>{info.chave}</td>
-              <td>{info.valor}</td>
-              <td>{info.descricao}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
       {mostrarModal && (
         <div className={styles.modal}>
-          {/* ALTERADO: Uso de <form> para melhor semântica e validação nativa */}
           <form onSubmit={handleCadastrar}>
             <h4>Nova Informação</h4>
 
@@ -142,7 +138,6 @@ export default function SecaoInformacoes({ empresaId }: Props) {
             />
 
             <div className={styles.botoes}>
-              {/* ALTERADO: Botão de salvar com estado de loading */}
               <button type="submit" disabled={loading}>
                 {loading ? 'Salvando...' : 'Salvar'}
               </button>
@@ -153,6 +148,36 @@ export default function SecaoInformacoes({ empresaId }: Props) {
           </form>
         </div>
       )}
+
+      <table className={styles.tabela}>
+        <thead>
+          <tr>
+            <th>Chave</th>
+            <th>Valor</th>
+            <th>Descrição</th>
+            {/* NOVO: Coluna para as ações */}
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {informacoes.map(info => (
+            <tr key={info.id}>
+              <td>{info.chave}</td>
+              <td>{info.valor}</td>
+              <td>{info.descricao}</td>
+              {/* NOVO: Célula com o botão de excluir */}
+              <td>
+                <button
+                  onClick={() => handleExcluir(info.id)}
+                  className={styles.botaoExcluir} // Lembre-se de adicionar este estilo no .css
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }

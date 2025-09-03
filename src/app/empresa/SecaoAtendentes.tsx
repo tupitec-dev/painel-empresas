@@ -23,7 +23,6 @@ export default function SecaoAtendentes({ empresaId }: Props) {
     estilo_personalidade: '',
     dialeto: '',
   })
-  // NOVO: Estado de loading para o botão de salvar
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -42,50 +41,65 @@ export default function SecaoAtendentes({ empresaId }: Props) {
     }
   }, [empresaId])
 
-  // ALTERADO: Função de cadastrar agora tem validação
+  // ALTERADO: Função de cadastrar agora atualiza a tela de forma otimizada
   async function handleCadastrar(e: React.FormEvent) {
-    e.preventDefault() // Previne o recarregamento da página pelo form
+    e.preventDefault()
 
-    // 1. Validação dos campos
     if (
       !novoAtendente.nome.trim() ||
       !novoAtendente.estilo_personalidade.trim() ||
       !novoAtendente.dialeto.trim()
     ) {
       alert('Todos os campos são obrigatórios.')
-      return // Interrompe a função se a validação falhar
+      return
     }
 
     setLoading(true)
 
     try {
-        const { error } = await supabase.from('atendentes').insert({
-            empresa_id: empresaId,
-            ...novoAtendente,
-        })
+        const { data: novoAtendenteCriado, error } = await supabase
+            .from('atendentes')
+            .insert({
+                empresa_id: empresaId,
+                ...novoAtendente,
+            })
+            .select()
+            .single()
 
         if (error) {
             alert('Ocorreu um erro ao cadastrar o atendente. Tente novamente.')
             console.error('Erro Supabase:', error)
         } else {
-            // Limpa o formulário e fecha o modal
             setNovoAtendente({ nome: '', estilo_personalidade: '', dialeto: '' })
             setMostrarModal(false)
-
-            // Recarrega a lista de atendentes para exibir o novo registro
-            const { data: atualizados } = await supabase
-                .from('atendentes')
-                .select('*')
-                .eq('empresa_id', empresaId)
-                .order('criado_em', { ascending: false })
-
-            setAtendentes(atualizados || [])
+            // Adiciona o novo atendente no início da lista na tela
+            setAtendentes([novoAtendenteCriado, ...atendentes])
         }
     } catch (e) {
         alert('Ocorreu um erro inesperado.')
         console.error(e);
     } finally {
         setLoading(false)
+    }
+  }
+
+  // NOVO: Função para excluir um atendente
+  async function handleExcluir(id: string) {
+    if (!window.confirm('Tem certeza que deseja excluir este atendente?')) {
+      return
+    }
+
+    const { error } = await supabase
+      .from('atendentes')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      alert('Ocorreu um erro ao excluir o atendente.')
+      console.error('Erro Supabase:', error)
+    } else {
+      // Remove o atendente da lista na tela
+      setAtendentes(atendentes.filter(at => at.id !== id))
     }
   }
 
@@ -96,35 +110,15 @@ export default function SecaoAtendentes({ empresaId }: Props) {
         + Cadastrar atendente
       </button>
 
-      <table className={styles.tabela}>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Estilo</th>
-            <th>Dialeto</th>
-          </tr>
-        </thead>
-        <tbody>
-          {atendentes.map(at => (
-            <tr key={at.id}>
-              <td>{at.nome}</td>
-              <td>{at.estilo_personalidade}</td>
-              <td>{at.dialeto}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
       {mostrarModal && (
         <div className={styles.modal}>
-          {/* ALTERADO: Uso de <form> para melhor semântica e acessibilidade */}
           <form onSubmit={handleCadastrar}>
             <h4>Novo Atendente</h4>
             <input
               placeholder="Nome"
               value={novoAtendente.nome}
               onChange={e => setNovoAtendente({ ...novoAtendente, nome: e.target.value })}
-              required // Validação nativa do navegador
+              required
             />
             <input
               placeholder="Estilo de personalidade (Ex: Amigável e prestativo)"
@@ -139,17 +133,46 @@ export default function SecaoAtendentes({ empresaId }: Props) {
               required
             />
             <div className={styles.botoes}>
-              {/* ALTERADO: Botão de salvar com estado de loading */}
-              <button type="submit" disabled={loading}>
+              <button type="submit" className={styles.botao} disabled={loading}>
                 {loading ? 'Salvando...' : 'Salvar'}
               </button>
-              <button type="button" onClick={() => setMostrarModal(false)}>
+              <button type="button" onClick={() => setMostrarModal(false)} className={styles.botaoSecundario}>
                 Cancelar
               </button>
             </div>
           </form>
         </div>
       )}
+
+      <table className={styles.tabela}>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Estilo</th>
+            <th>Dialeto</th>
+            {/* NOVO: Coluna para as ações */}
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {atendentes.map(at => (
+            <tr key={at.id}>
+              <td>{at.nome}</td>
+              <td>{at.estilo_personalidade}</td>
+              <td>{at.dialeto}</td>
+              {/* NOVO: Célula com o botão de excluir */}
+              <td>
+                <button
+                  onClick={() => handleExcluir(at.id)}
+                  className={styles.botaoExcluir} // Use o mesmo estilo do outro arquivo
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
